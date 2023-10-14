@@ -2,10 +2,10 @@ export class LocalStorage {
   private readonly MAX_KEY_LENGTH = 100;
   private readonly KEY_SIZE = 1;
   private readonly VALUE_SIZE = 4;
+  private readonly START_BYTE = 0;
+
   private readonly decoder = new TextDecoder();
   private readonly encoder = new TextEncoder();
-
-  private readonly START_BYTE = 0;
 
   private readonly dataView: DataView;
   private readonly arrayBuffer: ArrayBuffer;
@@ -27,6 +27,12 @@ export class LocalStorage {
     const valueDecode = this.encoder.encode(value);
     const keyDecode = this.encoder.encode(key);
 
+    const [keyOffsets] = this.getOffsetKey(key);
+
+    if (keyOffsets !== this.START_BYTE) {
+      this.remove(key);
+    }
+
     const startByte = this.getStartByte(this.START_BYTE);
     const keyOffset = this.offset + startByte;
     const valueOffset = this.offset + startByte + keyDecode.byteLength;
@@ -36,6 +42,7 @@ export class LocalStorage {
 
     const keyArr = new Int8Array(this.arrayBuffer, keyOffset, keyDecode.byteLength);
     const valueArr = new Int8Array(this.arrayBuffer, valueOffset, valueDecode.byteLength);
+
     keyArr.set(keyDecode);
     valueArr.set(valueDecode);
   }
@@ -56,7 +63,8 @@ export class LocalStorage {
 
     if (keyOffset !== this.START_BYTE) {
       const startByte = keyOffset - this.offset;
-      const endByte = keyOffset + valueSize + this.offset + this.KEY_SIZE;
+      const keyLength = this.dataView.getInt8(startByte);
+      const endByte = startByte + keyLength + this.offset + valueSize;
 
       const startArray = new Int8Array(this.arrayBuffer, endByte);
       const newArray = new Int8Array(this.arrayBuffer, startByte);
@@ -68,6 +76,7 @@ export class LocalStorage {
   private getOffsetKey (key: string, startOffset: number = 0): number[] {
     const offsetKey = this.dataView.getInt8(startOffset);
     const offsetValue = this.dataView.getInt32(startOffset + this.KEY_SIZE);
+
     const bytesOffsets = startOffset === this.START_BYTE ? offsetKey : startOffset + this.offset;
 
     const viewKey = new Int8Array(this.arrayBuffer, bytesOffsets, offsetKey);
@@ -78,7 +87,7 @@ export class LocalStorage {
     if (decodeKey === key) {
       return [bytesOffsets, offsetValue];
     } else {
-      return this.getOffsetKey(key, (offsetKey + offsetValue + this.offset + startOffset));
+      return this.getOffsetKey(key, offsetKey + offsetValue + this.offset + startOffset);
     }
   }
 
@@ -90,7 +99,7 @@ export class LocalStorage {
 
     return this.getStartByte(this.offset + keySize + valueSize + start);
   }
-  
+
   values (): IterableIterator<string> {
     const iterable = this[Symbol.iterator]();
     let iterator = iterable.next();
@@ -128,7 +137,7 @@ export class LocalStorage {
       }
     };
   }
-  
+
   [Symbol.iterator] (): IterableIterator<string[]> {
     let startByte = this.START_BYTE;
     const dataView = this.dataView;
