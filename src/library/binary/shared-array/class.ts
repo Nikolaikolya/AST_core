@@ -91,6 +91,44 @@ export class LocalStorage {
     return this.getStartByte(this.offset + keySize + valueSize + start);
   }
   
+  values (): IterableIterator<string> {
+    const iterable = this[Symbol.iterator]();
+    let iterator = iterable.next();
+
+    return {
+      [Symbol.iterator] () {
+        return this;
+      },
+      next (): IteratorResult<string> {
+        const { value, done } = iterator;
+        if (done === true) return { value: undefined, done: true };
+
+        iterator = iterable.next();
+
+        return { value: value[1], done };
+      }
+    };
+  }
+
+  keys (): IterableIterator<string> {
+    const iterable = this[Symbol.iterator]();
+    let iterator = iterable.next();
+
+    return {
+      [Symbol.iterator] () {
+        return this;
+      },
+      next (): IteratorResult<string> {
+        const { value, done } = iterator;
+        if (done === true) return { value: undefined, done: true };
+
+        iterator = iterable.next();
+
+        return { value: value[0], done };
+      }
+    };
+  }
+  
   [Symbol.iterator] (): IterableIterator<string[]> {
     let startByte = this.START_BYTE;
     const dataView = this.dataView;
