@@ -90,4 +90,35 @@ export class LocalStorage {
 
     return this.getStartByte(this.offset + keySize + valueSize + start);
   }
+  
+  [Symbol.iterator] (): IterableIterator<string[]> {
+    let startByte = this.START_BYTE;
+    const dataView = this.dataView;
+    const offset = this.offset;
+    const arrayBuffer = this.arrayBuffer;
+    const decoder = this.decoder;
+
+    return {
+
+      [Symbol.iterator] () {
+        return this;
+      },
+
+      next (): IteratorResult<string[]> {
+        const keyLength = dataView.getInt8(startByte);
+        const valueLength = dataView.getInt32(startByte + 1);
+
+        if (keyLength === 0) return { value: undefined, done: true };
+
+        const keyArray = new Int8Array(arrayBuffer, offset + startByte, keyLength);
+        const valueArray = new Int8Array(arrayBuffer, offset + startByte + keyLength, valueLength);
+
+        const value = [decoder.decode(keyArray), decoder.decode(valueArray)];
+
+        startByte = startByte + offset + keyLength + valueLength;
+
+        return { value, done: false };
+      }
+    };
+  }
 }
