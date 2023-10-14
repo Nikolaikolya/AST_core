@@ -8,10 +8,8 @@ export class LocalStorage {
   private readonly encoder = new TextEncoder();
 
   private readonly dataView: DataView;
-  private readonly arrayBuffer: ArrayBuffer;
 
-  constructor (private readonly size: number) {
-    this.arrayBuffer = new ArrayBuffer(this.size);
+  constructor (private readonly arrayBuffer: ArrayBuffer) {
     this.dataView = new DataView(this.arrayBuffer);
   }
 
