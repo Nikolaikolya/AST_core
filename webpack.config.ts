@@ -11,32 +11,32 @@ const config = {
       {
         test: /.ts?$/,
         use: "ts-loader",
-        exclude: /node_modules/
-      }
-    ]
+        exclude: /node_modules/,
+      },
+    ],
   },
   resolve: {
     alias: {
       components: path.resolve(__dirname, "src/components"),
-      services: path.resolve(__dirname, "src/services")
+      services: path.resolve(__dirname, "src/services"),
     },
-    extensions: [".ts", ".js"]
+    extensions: [".ts", ".js"],
   },
   output: {
     filename: "bundle.js",
-    path: path.resolve(__dirname, "dist")
+    path: path.resolve(__dirname, "dist"),
   },
   devServer: {
     static: {
-      directory: path.join(__dirname, "public")
+      directory: path.join(__dirname, "public"),
     },
     compress: true,
-    port: 9000,
+    port: 9001,
     headers: {
       "Cross-Origin-Opener-Policy": "same-origin",
-      "Cross-Origin-Embedder-Policy": "require-corp"
-    }
-  }
+      "Cross-Origin-Embedder-Policy": "require-corp",
+    },
+  },
 };
 
 export default config;
