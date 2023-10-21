@@ -23,7 +23,7 @@ export class Bit implements IBit {
     return newValue;
   }
 
-  private getCount(count: number): number {
+  getCount(count: number): number {
     if (count > 8) {
       throw new Error("Bit arrow 8");
     }
@@ -31,11 +31,15 @@ export class Bit implements IBit {
     return (2 ** 8 - 1) >>> (8 - count);
   }
 
-  private setPosition(value: number, position: number): BitResult {
+  setPosition(value: number, position: number): BitResult {
     if (position > 8) {
       throw new Error("Bit arrow 8");
     }
 
     return value << position;
+  }
+
+  getByteSiZeNumber(number: number): number {
+    return Math.ceil(Math.ceil(Math.log2(number + 1)) / 8);
   }
 }
